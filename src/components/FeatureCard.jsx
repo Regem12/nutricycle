@@ -1,6 +1,6 @@
 import React from "react";
 
-export default function FeatureCard({ icon: title, description }) {
+export default function FeatureCard({ icon: Icon, title, description }) {
   return (
     <div className="group relative flex flex-col gap-4 p-8 rounded-2xl bg-[#FFFBEA] border-2 border-gray-100 hover:border-green-300 transition-all duration-300 shadow-md hover:shadow-xl transform hover:-translate-y-2">
       {/* Icon Container with gradient background */}
