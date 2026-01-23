@@ -10,7 +10,7 @@ const AboutSection = () => {
 
       {/* Description Card */}
       <div className="max-w-4xl mx-auto mb-20">
-        <div className="bg-white rounded-xl shadow-lg p-8 lg:p-10 border border-gray-200">
+        <div className="bg-[#FFFBEA] rounded-xl shadow-lg p-8 lg:p-10 border border-gray-200">
           <p className="text-lg text-gray-700 leading-relaxed mb-4">
             <span className="font-semibold text-green-600">NutriCycle</span> is
             an innovative solution designed to address the growing issue of

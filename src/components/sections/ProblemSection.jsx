@@ -61,7 +61,7 @@ const ProblemSection = ({ scrollToSection }) => {
             </div>
           </div>
 
-          <div className="flex-1 max-w-xl bg-white rounded-3xl p-10 shadow-2xl border-l-8 border-green-600">
+          <div className="flex-1 max-w-xl bg-[#FFFBEA] rounded-3xl p-10 shadow-2xl border-l-8 border-green-600">
             <p className="text-xl lg:text-2xl text-gray-800 leading-relaxed mb-10">
               Every day, markets, food establishments, and households produce
               massive amounts of vegetable waste. Without proper recycling, it

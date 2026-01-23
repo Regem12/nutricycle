@@ -56,9 +56,9 @@ const HeroSection = ({ setShowAppModal }) => {
 
       {/* Trusted By Section */}
       <div className="absolute bottom-0 left-0 right-0 text-center py-4 bg-gradient-to-t from-green-100/50 to-transparent text-xs sm:text-sm">
-        <p className="text-gray-700 mb-2">
+        {/*<p className="text-gray-700 mb-2">
           Trusted by over 39,000 forward-thinking companies
-        </p>
+        </p>*/}
         <div className="flex justify-center gap-4 flex-wrap">
           {/* Add logos here if needed */}
         </div>

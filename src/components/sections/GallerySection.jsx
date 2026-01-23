@@ -4,6 +4,8 @@ import Prototype1 from "@/assets/img1.png";
 import Prototype2 from "@/assets/img2.jpg";
 import Prototype3 from "@/assets/img3.jpg";
 import Prototype4 from "@/assets/img4.jpg";
+import Splash3 from "@/assets/splash3.png";
+import Splash4 from "@/assets/splash4.png";
 
 const GallerySection = () => {
   const [currentSlide, setCurrentSlide] = useState(0);
@@ -15,7 +17,7 @@ const GallerySection = () => {
       desc: "Advanced sensors and monitoring hardware",
     },
     {
-      src: Prototype2,
+      src: Splash4,
       title: "Mobile Monitoring",
       desc: "Real-time data visualization and control",
     },
@@ -42,10 +44,7 @@ const GallerySection = () => {
   };
 
   return (
-    <section
-      id="gallery"
-      className="py-20 scroll-mt-20 bg-gradient-to-b from-white to-gray-50"
-    >
+    <section id="gallery" className="py-20 scroll-mt-20">
       <div className="max-w-7xl mx-auto px-4">
         <SectionHeader
           title="Gallery and Prototype"
@@ -98,7 +97,7 @@ const GallerySection = () => {
                       <img
                         src={image.src}
                         alt={image.title}
-                        className="w-full h-[420px] md:h-[520px] lg:h-[600px] object-cover"
+                        className={`w-full h-[420px] md:h-[520px] lg:h-[600px] ${[Splash4].includes(image.src) ? "object-contain" : "object-cover"}`}
                       />
                       <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/30 to-transparent">
                         <div className="absolute bottom-0 left-0 right-0 p-8 md:p-12 text-white">
@@ -121,7 +120,7 @@ const GallerySection = () => {
           <button
             onClick={prevSlide}
             className="absolute left-4 md:left-8 top-1/2 -translate-y-1/2 
-               bg-black/50 hover:bg-green-600 
+               bg-black/50 hover:bg-green-700 
                border-2 border-white/20 
                backdrop-blur-sm 
                rounded-full p-4 md:p-6 
@@ -147,7 +146,7 @@ const GallerySection = () => {
           <button
             onClick={nextSlide}
             className="absolute right-4 md:right-8 top-1/2 -translate-y-1/2 
-               bg-black/50 hover:bg-green-600 
+               bg-black/50 hover:bg-green-700 
                border-2 border-white/20 
                backdrop-blur-sm 
                rounded-full p-4 md:p-6 

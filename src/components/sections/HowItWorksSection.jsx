@@ -5,10 +5,7 @@ import ProcessStep from "@/components/ProcessStep";
 
 const HowItWorksSection = () => {
   return (
-    <section
-      id="how-it-works"
-      className="py-20 scroll-mt-20 bg-gradient-to-b from-white to-green-50"
-    >
+    <section id="how-it-works" className="py-20 scroll-mt-20">
       <div className="max-w-6xl mx-auto px-4">
         <SectionHeader
           title="How NutriCycle Works"

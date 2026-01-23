@@ -1,6 +1,7 @@
 import React from "react";
 import { Menu, X } from "lucide-react";
 import Logo from "../assets/LOGO-Green.svg";
+import logo1 from "../assets/logo1.png";
 
 export default function Header({
   mobileMenuOpen,
@@ -25,7 +26,7 @@ export default function Header({
             className="flex items-center gap-3 cursor-pointer"
             onClick={() => scrollToSection("home")}
           >
-            <img src={Logo} alt="NutriCycle Logo" className="h-10 w-10" />
+            <img src={logo1} alt="NutriCycle Logo" className="h-15 w-10" />
             <h2 className="text-2xl font-bold text-green-800">NutriCycle</h2>
           </div>
 

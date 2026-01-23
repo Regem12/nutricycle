@@ -1,4 +1,9 @@
 import React from "react";
+import Cost from "@/assets/Cost.png";
+import Community from "@/assets/Community.png";
+import Automation from "@/assets/Automation.png";
+import Nutrition from "@/assets/Nutrition.png";
+import Sustainability from "@/assets/Sustainability.png";
 
 const BenefitsSection = () => {
   return (
@@ -22,7 +27,7 @@ const BenefitsSection = () => {
           <div className="group">
             <div className="overflow-hidden rounded-3xl shadow-xl mb-6">
               <img
-                src="https://thumbs.dreamstime.com/b/stacks-coins-grow-higher-small-plants-sprouting-top-green-upward-arrow-visually-represents-financial-growth-image-350808538.jpg"
+                src={Cost}
                 alt="Cost Savings"
                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -39,7 +44,7 @@ const BenefitsSection = () => {
           <div className="group">
             <div className="overflow-hidden rounded-3xl shadow-xl mb-6">
               <img
-                src="https://www.epa.gov/sites/default/files/2015-09/lifecycle.jpg"
+                src={Sustainability}
                 alt="Sustainability"
                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -56,7 +61,7 @@ const BenefitsSection = () => {
           <div className="group">
             <div className="overflow-hidden rounded-3xl shadow-xl mb-6">
               <img
-                src="https://i0.wp.com/primority.com/wp-content/uploads/2025/09/image-5.png?fit=1536%2C1024&ssl=1"
+                src={Automation}
                 alt="Automation"
                 className="w-full h-64 object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -77,7 +82,7 @@ const BenefitsSection = () => {
           <div className="group flex flex-col md:flex-row gap-8 items-start">
             <div className="overflow-hidden rounded-3xl shadow-xl flex-shrink-0">
               <img
-                src="https://cdn.shopify.com/s/files/1/0039/4647/9689/files/What-Do-Chickens-Eat_-A-Chicken-Treat-Chart-_940x540-01.jpg"
+                src={Nutrition}
                 alt="Nutrition"
                 className="w-64 h-48 object-cover group-hover:scale-105 transition-transform duration-500"
               />
@@ -93,10 +98,10 @@ const BenefitsSection = () => {
           </div>
 
           {/* Community Impact */}
-          <div className="group flex flex-col md:flex-row gap-8 items-start md:items-end md:text-right">
+          <div className="group flex flex-col md:flex-row gap-8 items-start  md:text-left">
             <div className="overflow-hidden rounded-3xl shadow-xl flex-shrink-0 order-2 md:order-1">
               <img
-                src="https://thecounter.org/wp-content/uploads/2021/04/lead-header-regenerative-agriculture-april-2021.jpg"
+                src={Community}
                 alt="Community Impact"
                 className="w-64 h-48 object-cover group-hover:scale-105 transition-transform duration-500"
               />

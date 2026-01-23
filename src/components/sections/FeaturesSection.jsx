@@ -5,10 +5,7 @@ import FeatureCard from "@/components/FeatureCard";
 
 const FeaturesSection = () => {
   return (
-    <section
-      id="features"
-      className="py-16 scroll-mt-20 bg-gradient-to-b from-green-50 to-white"
-    >
+    <section id="features" className="py-16 scroll-mt-20">
       <SectionHeader
         title="Key Features"
         subtitle="Advanced technology for efficient waste management and upcycling"

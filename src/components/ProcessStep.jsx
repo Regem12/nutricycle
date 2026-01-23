@@ -1,6 +1,6 @@
-import React from 'react';
+import React from "react";
 
-export default function ProcessStep({ icon: Icon, step, title, description }) {
+export default function ProcessStep({ icon: step, title, description }) {
   return (
     <div className="flex flex-col items-center text-center gap-4 max-w-[280px] mx-auto">
       <div className="relative">
