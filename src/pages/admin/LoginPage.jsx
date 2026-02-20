@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Lock, Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useNavigate, useLocation, Link } from "react-router-dom";
+import toast from "react-hot-toast";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
@@ -17,6 +18,7 @@ export default function LoginPage() {
   // Navigate when user is authenticated
   useEffect(() => {
     if (user) {
+      toast.success("Login successful.");
       const from = location.state?.from?.pathname || "/admin/dashboard";
       navigate(from, { replace: true });
     } else if (loginAttempted && !loading && !user) {

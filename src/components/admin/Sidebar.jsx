@@ -1,8 +1,16 @@
 import React from "react";
-import { LayoutDashboard, Users, Cpu, Package, LogOut, X } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  Cpu,
+  Package,
+  LogOut,
+  X,
+  Loader2,
+} from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 
-export default function Sidebar({ onLogout, isOpen, onClose }) {
+export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
   const location = useLocation();
 
   const navItems = [
@@ -83,10 +91,20 @@ export default function Sidebar({ onLogout, isOpen, onClose }) {
         <div className="p-4 border-t border-gray-200">
           <button
             onClick={onLogout}
-            className="flex items-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all w-full"
+            disabled={isLoggingOut}
+            className="flex items-center justify-center gap-3 px-4 py-3 rounded-lg text-red-600 hover:bg-red-50 transition-all w-full disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Logout</span>
+            {isLoggingOut ? (
+              <>
+                <Loader2 className="w-5 h-5 animate-spin" />
+                <span className="font-medium">Logging out...</span>
+              </>
+            ) : (
+              <>
+                <LogOut className="w-5 h-5" />
+                <span className="font-medium">Logout</span>
+              </>
+            )}
           </button>
         </div>
       </aside>
