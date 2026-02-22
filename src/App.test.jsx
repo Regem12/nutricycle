@@ -1,10 +1,15 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
+import { MemoryRouter } from "react-router-dom";
 import App from "./App";
 
 describe("App Component", () => {
   it("renders without crashing", () => {
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
 
     expect(
       screen.getByText("Turning Vegetable Waste into Growth"),
@@ -12,19 +17,31 @@ describe("App Component", () => {
   });
 
   it("renders Header component", () => {
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByRole("banner")).toBeInTheDocument();
   });
 
   it("renders Footer component", () => {
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
 
     expect(screen.getByText(/© 2025 NutriCycle Project/i)).toBeInTheDocument();
   });
 
   it("renders main sections", () => {
-    render(<App />);
+    render(
+      <MemoryRouter>
+        <App />
+      </MemoryRouter>,
+    );
 
     // Check that main hero title is rendered
     expect(
