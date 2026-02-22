@@ -5,6 +5,9 @@ import {
   onAuthStateChanged,
   createUserWithEmailAndPassword,
   getIdTokenResult,
+  sendPasswordResetEmail,
+  verifyPasswordResetCode,
+  confirmPasswordReset as firebaseConfirmPasswordReset,
 } from "firebase/auth";
 import { auth } from "@/config/firebase";
 
@@ -133,12 +136,92 @@ export function AuthProvider({ children }) {
     }
   };
 
+  const resetPassword = async (email) => {
+    try {
+      await sendPasswordResetEmail(auth, email);
+      return { success: true };
+    } catch (error) {
+      console.error("Password reset error:", error);
+
+      let errorMessage = "Failed to send password reset email.";
+
+      if (error.code === "auth/user-not-found") {
+        errorMessage = "No account found with this email address.";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Invalid email address.";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage =
+          "Too many password reset attempts. Please wait a few minutes and try again.";
+      } else if (error.code === "auth/quota-exceeded") {
+        errorMessage = "Password reset quota exceeded. Please try again later.";
+      } else if (error.code === "auth/network-request-failed") {
+        errorMessage =
+          "Network error. Please check your connection and try again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      return { success: false, error: errorMessage };
+    }
+  };
+
+  const verifyResetCode = async (code) => {
+    try {
+      // Verify the password reset code and get the user's email
+      const email = await verifyPasswordResetCode(auth, code);
+      return email;
+    } catch (error) {
+      console.error("Verify reset code error:", error);
+
+      let errorMessage = "Invalid or expired reset code.";
+
+      if (error.code === "auth/invalid-action-code") {
+        errorMessage = "This reset link is invalid or has already been used.";
+      } else if (error.code === "auth/expired-action-code") {
+        errorMessage = "This reset link has expired. Please request a new one.";
+      } else if (error.code === "auth/user-not-found") {
+        errorMessage = "User account not found.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      throw new Error(errorMessage);
+    }
+  };
+
+  const confirmPasswordReset = async (code, newPassword) => {
+    try {
+      // Confirm the password reset with the code and new password
+      await firebaseConfirmPasswordReset(auth, code, newPassword);
+      return { success: true };
+    } catch (error) {
+      console.error("Confirm password reset error:", error);
+
+      let errorMessage = "Failed to reset password.";
+
+      if (error.code === "auth/invalid-action-code") {
+        errorMessage = "This reset link is invalid or has already been used.";
+      } else if (error.code === "auth/expired-action-code") {
+        errorMessage = "This reset link has expired. Please request a new one.";
+      } else if (error.code === "auth/weak-password") {
+        errorMessage = "Password is too weak. Please use a stronger password.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+
+      throw new Error(errorMessage);
+    }
+  };
+
   const value = {
     user,
     loading,
     login,
     logout,
     register,
+    resetPassword,
+    verifyResetCode,
+    confirmPasswordReset,
   };
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

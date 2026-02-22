@@ -73,6 +73,19 @@ export const deleteUser = async (userId) => {
   });
 };
 
+export const sendPasswordResetLink = async (userId) => {
+  return apiRequest(`/admin/users/${userId}/reset-password`, {
+    method: "POST",
+  });
+};
+
+export const setAdminClaim = async (userId, isAdmin) => {
+  return apiRequest(`/admin/users/${userId}/admin-claim`, {
+    method: "PATCH",
+    body: JSON.stringify({ isAdmin }),
+  });
+};
+
 // ============= MACHINES API =============
 export const getMachines = async () => {
   return apiRequest("/machines");
@@ -178,6 +191,7 @@ export default {
   createUser,
   updateUser,
   deleteUser,
+  sendPasswordResetLink,
   getMachines,
   getMachineById,
   createMachine,
