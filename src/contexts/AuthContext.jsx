@@ -90,8 +90,9 @@ export function AuthProvider({ children }) {
         errorMessage = "Invalid email address.";
       } else if (error.code === "auth/too-many-requests") {
         errorMessage = "Too many failed attempts. Please try again later.";
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (error.code === "auth/user-disabled") {
+        errorMessage =
+          "This account has been disabled. Please contact support.";
       }
 
       return { success: false, error: errorMessage };
@@ -128,8 +129,16 @@ export function AuthProvider({ children }) {
         errorMessage = "Account already exists. Please sign in instead.";
       } else if (error.code === "auth/weak-password") {
         errorMessage = "Password should be at least 6 characters.";
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (error.code === "auth/password-does-not-meet-requirements") {
+        errorMessage =
+          "Password must contain: uppercase letter, number, and special character (!@#$%^&*).";
+      } else if (error.code === "auth/invalid-email") {
+        errorMessage = "Please enter a valid email address.";
+      } else if (error.code === "auth/operation-not-allowed") {
+        errorMessage =
+          "Account creation is temporarily disabled. Please contact support.";
+      } else if (error.code === "auth/too-many-requests") {
+        errorMessage = "Too many attempts. Please try again later.";
       }
 
       return { success: false, error: errorMessage };
@@ -157,8 +166,6 @@ export function AuthProvider({ children }) {
       } else if (error.code === "auth/network-request-failed") {
         errorMessage =
           "Network error. Please check your connection and try again.";
-      } else if (error.message) {
-        errorMessage = error.message;
       }
 
       return { success: false, error: errorMessage };
@@ -181,8 +188,6 @@ export function AuthProvider({ children }) {
         errorMessage = "This reset link has expired. Please request a new one.";
       } else if (error.code === "auth/user-not-found") {
         errorMessage = "User account not found.";
-      } else if (error.message) {
-        errorMessage = error.message;
       }
 
       throw new Error(errorMessage);
@@ -205,8 +210,9 @@ export function AuthProvider({ children }) {
         errorMessage = "This reset link has expired. Please request a new one.";
       } else if (error.code === "auth/weak-password") {
         errorMessage = "Password is too weak. Please use a stronger password.";
-      } else if (error.message) {
-        errorMessage = error.message;
+      } else if (error.code === "auth/password-does-not-meet-requirements") {
+        errorMessage =
+          "Password must contain: uppercase letter, number, and special character (!@#$%^&*).";
       }
 
       throw new Error(errorMessage);
