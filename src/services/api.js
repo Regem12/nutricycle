@@ -29,14 +29,24 @@ async function apiRequest(endpoint, options = {}) {
       },
     });
 
+    // Parse response body
+    const data = await response
+      .json()
+      .catch(() => ({ message: response.statusText }));
+
     if (!response.ok) {
-      const error = await response
-        .json()
-        .catch(() => ({ message: response.statusText }));
-      throw new Error(error.message || `API Error: ${response.status}`);
+      // Create error with response details
+      const error = new Error(
+        data.error || data.message || `API Error: ${response.status}`,
+      );
+      error.response = {
+        status: response.status,
+        data: data,
+      };
+      throw error;
     }
 
-    return await response.json();
+    return data;
   } catch (error) {
     console.error(`API Request failed for ${endpoint}:`, error);
     throw error;
