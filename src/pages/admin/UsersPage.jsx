@@ -22,7 +22,13 @@ import {
   ChevronRight,
 } from "lucide-react";
 import DashboardHeader from "@/components/admin/DashboardHeader";
-import { sendPasswordResetLink, setAdminClaim, getUsers, deleteUser, updateUser } from "@/services/api";
+import {
+  sendPasswordResetLink,
+  setAdminClaim,
+  getUsers,
+  deleteUser,
+  updateUser,
+} from "@/services/api";
 import { auth } from "@/config/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
 import toast from "react-hot-toast";
@@ -50,7 +56,7 @@ export default function UsersPage() {
   const [togglingAdminFor, setTogglingAdminFor] = useState(null); // Track admin toggle in progress
   const [togglingDisableFor, setTogglingDisableFor] = useState(null); // Track disable toggle in progress
   const [deletingUserId, setDeletingUserId] = useState(null); // Track which user is being deleted
-  
+
   // State for users data
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -66,11 +72,11 @@ export default function UsersPage() {
       setLoading(true);
       setError(null);
       const response = await getUsers();
-      
+
       // Transform API data to match component expectations
-      const transformedUsers = response.users.map(user => ({
+      const transformedUsers = response.users.map((user) => ({
         id: user.uid,
-        email: user.email || 'No email',
+        email: user.email || "No email",
         firebaseUid: user.uid,
         createdAt: user.metadata?.creationTime || new Date().toISOString(),
         machineCount: user.machineCount || 0, // Now using actual count from API
@@ -80,12 +86,12 @@ export default function UsersPage() {
         disabled: user.disabled,
         lastSignIn: user.metadata?.lastSignInTime,
       }));
-      
+
       setUsers(transformedUsers);
     } catch (error) {
-      console.error('Error fetching users:', error);
-      setError(error.message || 'Failed to load users');
-      toast.error('Failed to load users');
+      console.error("Error fetching users:", error);
+      setError(error.message || "Failed to load users");
+      toast.error("Failed to load users");
     } finally {
       setLoading(false);
     }
@@ -95,36 +101,43 @@ export default function UsersPage() {
   const stats = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
-    
-    const activeToday = users.filter(user => {
+
+    const activeToday = users.filter((user) => {
       if (!user.lastSignIn) return false;
       const lastSignIn = new Date(user.lastSignIn);
       lastSignIn.setHours(0, 0, 0, 0);
       return lastSignIn.getTime() === today.getTime();
     }).length;
-    
+
     const thisMonth = today.getMonth();
     const thisYear = today.getFullYear();
-    const newThisMonth = users.filter(user => {
+    const newThisMonth = users.filter((user) => {
       const created = new Date(user.createdAt);
-      return created.getMonth() === thisMonth && created.getFullYear() === thisYear;
+      return (
+        created.getMonth() === thisMonth && created.getFullYear() === thisYear
+      );
     }).length;
-    
+
     return { activeToday, newThisMonth };
   }, [users]);
 
   // Filter users
   const filteredUsers = useMemo(() => {
     let filtered = users.filter((user) => {
-      const matchesSearch = user.email.toLowerCase().includes(searchTerm.toLowerCase());
-      const matchesStatus = 
-        statusFilter === "all" ? true :
-        statusFilter === "active" ? !user.disabled :
-        statusFilter === "disabled" ? user.disabled :
-        true;
+      const matchesSearch = user.email
+        .toLowerCase()
+        .includes(searchTerm.toLowerCase());
+      const matchesStatus =
+        statusFilter === "all"
+          ? true
+          : statusFilter === "active"
+            ? !user.disabled
+            : statusFilter === "disabled"
+              ? user.disabled
+              : true;
       return matchesSearch && matchesStatus;
     });
-    
+
     // Sort users
     filtered.sort((a, b) => {
       switch (sortBy) {
@@ -140,10 +153,10 @@ export default function UsersPage() {
           return 0;
       }
     });
-    
+
     return filtered;
   }, [users, searchTerm, statusFilter, sortBy]);
-  
+
   // Paginate users
   const totalPages = Math.ceil(filteredUsers.length / itemsPerPage);
   const paginatedUsers = useMemo(() => {
@@ -151,7 +164,7 @@ export default function UsersPage() {
     const endIndex = startIndex + itemsPerPage;
     return filteredUsers.slice(startIndex, endIndex);
   }, [filteredUsers, currentPage, itemsPerPage]);
-  
+
   // Reset to page 1 when filters change
   useEffect(() => {
     setCurrentPage(1);
@@ -179,9 +192,12 @@ export default function UsersPage() {
       setUserToDelete(null);
     } catch (error) {
       toast.dismiss();
-      console.error('Error deleting user:', error);
-      
-      if (error.response?.status === 400 && error.response?.data?.error?.includes('own account')) {
+      console.error("Error deleting user:", error);
+
+      if (
+        error.response?.status === 400 &&
+        error.response?.data?.error?.includes("own account")
+      ) {
         toast.error("Cannot delete your own account");
       } else if (error.response?.status === 404) {
         toast.error("User not found");
@@ -208,7 +224,7 @@ export default function UsersPage() {
     setShowDisableConfirmModal(false);
 
     const action = user.disabled ? "enable" : "disable";
-    
+
     try {
       setTogglingDisableFor(user.id);
       const loadingToast = toast.loading(
@@ -224,12 +240,10 @@ export default function UsersPage() {
       // Update user in state
       setUsers(
         users.map((u) =>
-          u.id === user.id
-            ? { ...u, disabled: !user.disabled }
-            : u,
+          u.id === user.id ? { ...u, disabled: !user.disabled } : u,
         ),
       );
-      
+
       toast.success(
         `Account ${user.disabled ? "enabled" : "disabled"} successfully!`,
       );
@@ -261,12 +275,12 @@ export default function UsersPage() {
       const loadingToast = toast.loading("Generating reset link...");
 
       const response = await sendPasswordResetLink(user.firebaseUid);
-      
+
       if (response.success) {
         setResetLink(response.resetLink);
         setResetLinkEmail(response.email);
         setLinkCopied(false);
-        
+
         // Also send the actual reset email using Firebase (same as login page)
         let emailSent = false;
         try {
@@ -274,18 +288,18 @@ export default function UsersPage() {
           emailSent = true;
           console.log(`Password reset email sent to ${response.email}`);
         } catch (emailError) {
-          console.warn('Could not send reset email:', emailError);
+          console.warn("Could not send reset email:", emailError);
         }
-        
+
         setResetEmailSent(emailSent);
         setShowResetLinkModal(true);
         setUserToReset(null);
-        
+
         toast.dismiss(loadingToast);
         toast.success(
           emailSent
             ? "Reset link generated & email sent!"
-            : "Password reset link generated!"
+            : "Password reset link generated!",
         );
       } else {
         toast.dismiss(loadingToast);
@@ -359,7 +373,8 @@ export default function UsersPage() {
     } catch (error) {
       toast.dismiss();
       toast.error(
-        error.message || `Failed to ${isCurrentlyAdmin ? "revoke" : "grant"} admin access. Please try again.`,
+        error.message ||
+          `Failed to ${isCurrentlyAdmin ? "revoke" : "grant"} admin access. Please try again.`,
       );
     } finally {
       setTogglingAdminFor(null);
@@ -375,7 +390,7 @@ export default function UsersPage() {
 
       <div className="p-4 sm:p-8 space-y-6">
         {/* Actions Bar */}
-        <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-4">
+        <div className="flex flex-col lg:flex-row items-stretch lg:items-center justify-between gap-3">
           {/* Search */}
           <div className="relative flex-1 sm:max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
@@ -387,15 +402,15 @@ export default function UsersPage() {
               className="w-full pl-10 pr-4 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
             />
           </div>
-          
-          <div className="flex items-center gap-3">
+
+          <div className="flex items-center gap-2">
             {/* Sort Dropdown */}
             <div className="relative">
               <ArrowUpDown className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="pl-9 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white appearance-none cursor-pointer font-medium"
+                className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white appearance-none cursor-pointer text-sm"
               >
                 <option value="email-asc">Email A-Z</option>
                 <option value="newest">Newest First</option>
@@ -403,14 +418,14 @@ export default function UsersPage() {
                 <option value="machines">Most Machines</option>
               </select>
             </div>
-            
+
             {/* Status Filter */}
             <div className="relative">
               <Filter className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
               <select
                 value={statusFilter}
                 onChange={(e) => setStatusFilter(e.target.value)}
-                className="pl-9 pr-10 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white appearance-none cursor-pointer font-medium"
+                className="pl-9 pr-8 py-2.5 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none bg-white appearance-none cursor-pointer text-sm"
               >
                 <option value="all">All Users</option>
                 <option value="active">Active Only</option>
@@ -418,14 +433,16 @@ export default function UsersPage() {
               </select>
             </div>
 
-            {/* Refresh Button */}
+            {/* Refresh Button - Icon Only */}
             <button
               onClick={fetchUsers}
               disabled={loading}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2.5 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              title="Refresh users"
             >
-              <RefreshCw className={`w-4 h-4 ${loading ? 'animate-spin' : ''}`} />
-              <span className="font-medium">Refresh</span>
+              <RefreshCw
+                className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
+              />
             </button>
           </div>
         </div>
@@ -471,7 +488,9 @@ export default function UsersPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">Active Today</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.activeToday}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.activeToday}
+                </p>
               </div>
             </div>
           </div>
@@ -483,7 +502,9 @@ export default function UsersPage() {
               </div>
               <div>
                 <p className="text-sm text-gray-600">New This Month</p>
-                <p className="text-2xl font-bold text-gray-900">{stats.newThisMonth}</p>
+                <p className="text-2xl font-bold text-gray-900">
+                  {stats.newThisMonth}
+                </p>
               </div>
             </div>
           </div>
@@ -521,7 +542,9 @@ export default function UsersPage() {
                     <td colSpan="6" className="px-6 py-12 text-center">
                       <div className="flex flex-col items-center gap-3">
                         <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
-                        <p className="text-gray-600 font-medium">Loading users...</p>
+                        <p className="text-gray-600 font-medium">
+                          Loading users...
+                        </p>
                       </div>
                     </td>
                   </tr>
@@ -531,7 +554,9 @@ export default function UsersPage() {
                       colSpan="6"
                       className="px-6 py-12 text-center text-gray-500"
                     >
-                      {searchTerm || statusFilter !== "all" ? "No users found matching your filters" : "No users found"}
+                      {searchTerm || statusFilter !== "all"
+                        ? "No users found matching your filters"
+                        : "No users found"}
                     </td>
                   </tr>
                 ) : (
@@ -542,20 +567,26 @@ export default function UsersPage() {
                     >
                       <td className="px-6 py-4">
                         <div className="flex items-center gap-3">
-                          <div className={`w-10 h-10 rounded-full flex items-center justify-center ${
-                            user.disabled 
-                              ? "bg-gray-400" 
-                              : "bg-gradient-to-br from-green-500 to-emerald-600"
-                          }`}>
+                          <div
+                            className={`w-10 h-10 rounded-full flex items-center justify-center ${
+                              user.disabled
+                                ? "bg-gray-400"
+                                : "bg-gradient-to-br from-green-500 to-emerald-600"
+                            }`}
+                          >
                             <span className="text-white font-semibold text-sm">
                               {user.email.charAt(0).toUpperCase()}
                             </span>
                           </div>
                           <div>
                             <div className="flex items-center gap-2">
-                              <p className={`font-medium ${
-                                user.disabled ? "text-gray-500" : "text-gray-900"
-                              }`}>
+                              <p
+                                className={`font-medium ${
+                                  user.disabled
+                                    ? "text-gray-500"
+                                    : "text-gray-900"
+                                }`}
+                              >
                                 {user.email}
                               </p>
                               {user.disabled && (
@@ -584,19 +615,21 @@ export default function UsersPage() {
                         </div>
                       </td>
                       <td className="px-6 py-4 align-middle">
-                        <span 
-                          className="text-sm text-gray-600 font-mono cursor-help" 
+                        <span
+                          className="text-sm text-gray-600 font-mono cursor-help"
                           title={user.firebaseUid}
                         >
                           {user.firebaseUid.substring(0, 12)}...
                         </span>
                       </td>
                       <td className="px-6 py-4 align-middle">
-                        <span className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
-                          user.machineCount === 0 
-                            ? "bg-gray-100 text-gray-600" 
-                            : "bg-blue-100 text-blue-700 border border-blue-200"
-                        }`}>
+                        <span
+                          className={`inline-flex items-center px-2.5 py-1 rounded-md text-xs font-semibold ${
+                            user.machineCount === 0
+                              ? "bg-gray-100 text-gray-600"
+                              : "bg-blue-100 text-blue-700 border border-blue-200"
+                          }`}
+                        >
                           {user.machineCount}
                         </span>
                       </td>
@@ -635,13 +668,19 @@ export default function UsersPage() {
                           </button>
                           <button
                             onClick={() => promptPasswordReset(user)}
-                            disabled={generatingFor === user.id || user.disabled}
+                            disabled={
+                              generatingFor === user.id || user.disabled
+                            }
                             className={`p-2 rounded-lg transition-colors ${
                               generatingFor === user.id || user.disabled
                                 ? "text-gray-400 bg-gray-100 cursor-not-allowed"
                                 : "text-blue-600 hover:bg-blue-50"
                             }`}
-                            title={user.disabled ? "Cannot reset password for disabled account" : "Send password reset link"}
+                            title={
+                              user.disabled
+                                ? "Cannot reset password for disabled account"
+                                : "Send password reset link"
+                            }
                           >
                             {generatingFor === user.id ? (
                               <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin" />
@@ -697,43 +736,56 @@ export default function UsersPage() {
               </tbody>
             </table>
           </div>
-          
+
           {/* Pagination Controls */}
           {filteredUsers.length > 0 && (
             <div className="flex flex-col sm:flex-row items-center justify-between gap-4 px-6 py-4 border-t border-gray-200">
               <div className="text-sm text-gray-600">
-                Showing {Math.min((currentPage - 1) * itemsPerPage + 1, filteredUsers.length)} to {Math.min(currentPage * itemsPerPage, filteredUsers.length)} of {filteredUsers.length} {filteredUsers.length === 1 ? 'user' : 'users'}
+                Showing{" "}
+                {Math.min(
+                  (currentPage - 1) * itemsPerPage + 1,
+                  filteredUsers.length,
+                )}{" "}
+                to {Math.min(currentPage * itemsPerPage, filteredUsers.length)}{" "}
+                of {filteredUsers.length}{" "}
+                {filteredUsers.length === 1 ? "user" : "users"}
               </div>
-              
+
               {totalPages > 1 && (
                 <div className="flex items-center gap-2">
                   <button
-                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.max(1, prev - 1))
+                    }
                     disabled={currentPage === 1}
                     className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                   >
                     <ChevronLeft className="w-4 h-4" />
                     <span className="text-sm font-medium">Previous</span>
                   </button>
-                  
+
                   <div className="flex items-center gap-1">
-                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(page => (
-                      <button
-                        key={page}
-                        onClick={() => setCurrentPage(page)}
-                        className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
-                          currentPage === page
-                            ? 'bg-green-600 text-white'
-                            : 'border border-gray-200 hover:bg-gray-50'
-                        }`}
-                      >
-                        {page}
-                      </button>
-                    ))}
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map(
+                      (page) => (
+                        <button
+                          key={page}
+                          onClick={() => setCurrentPage(page)}
+                          className={`w-10 h-10 rounded-lg text-sm font-medium transition-colors ${
+                            currentPage === page
+                              ? "bg-green-600 text-white"
+                              : "border border-gray-200 hover:bg-gray-50"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ),
+                    )}
                   </div>
-                  
+
                   <button
-                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    onClick={() =>
+                      setCurrentPage((prev) => Math.min(totalPages, prev + 1))
+                    }
                     disabled={currentPage === totalPages}
                     className="flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
                   >
@@ -752,9 +804,13 @@ export default function UsersPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex items-start gap-4 mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                userToToggleAdmin.customClaims?.admin ? "bg-orange-100" : "bg-purple-100"
-              }`}>
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  userToToggleAdmin.customClaims?.admin
+                    ? "bg-orange-100"
+                    : "bg-purple-100"
+                }`}
+              >
                 {userToToggleAdmin.customClaims?.admin ? (
                   <ShieldOff className="w-6 h-6 text-orange-600" />
                 ) : (
@@ -763,11 +819,13 @@ export default function UsersPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {userToToggleAdmin.customClaims?.admin ? "Revoke Admin Access?" : "Grant Admin Access?"}
+                  {userToToggleAdmin.customClaims?.admin
+                    ? "Revoke Admin Access?"
+                    : "Grant Admin Access?"}
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  {userToToggleAdmin.customClaims?.admin 
-                    ? "Remove admin privileges from:" 
+                  {userToToggleAdmin.customClaims?.admin
+                    ? "Remove admin privileges from:"
                     : "Grant administrator privileges to:"}
                 </p>
                 <p className="font-semibold text-gray-900 mt-1">
@@ -775,16 +833,22 @@ export default function UsersPage() {
                 </p>
               </div>
             </div>
-            
-            <div className={`border rounded-lg p-3 mb-4 ${
-              userToToggleAdmin.customClaims?.admin 
-                ? "bg-orange-50 border-orange-200" 
-                : "bg-purple-50 border-purple-200"
-            }`}>
-              <p className={`text-sm ${
-                userToToggleAdmin.customClaims?.admin ? "text-orange-800" : "text-purple-800"
-              }`}>
-                {userToToggleAdmin.customClaims?.admin 
+
+            <div
+              className={`border rounded-lg p-3 mb-4 ${
+                userToToggleAdmin.customClaims?.admin
+                  ? "bg-orange-50 border-orange-200"
+                  : "bg-purple-50 border-purple-200"
+              }`}
+            >
+              <p
+                className={`text-sm ${
+                  userToToggleAdmin.customClaims?.admin
+                    ? "text-orange-800"
+                    : "text-purple-800"
+                }`}
+              >
+                {userToToggleAdmin.customClaims?.admin
                   ? "This user will lose access to the admin panel and all management features."
                   : "This user will gain full access to the admin panel, including user management, machine control, and batch operations."}
               </p>
@@ -808,7 +872,9 @@ export default function UsersPage() {
                     : "bg-purple-600 hover:bg-purple-700 text-white"
                 }`}
               >
-                {userToToggleAdmin.customClaims?.admin ? "Revoke Access" : "Grant Access"}
+                {userToToggleAdmin.customClaims?.admin
+                  ? "Revoke Access"
+                  : "Grant Access"}
               </button>
             </div>
           </div>
@@ -820,9 +886,13 @@ export default function UsersPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
             <div className="flex items-start gap-4 mb-4">
-              <div className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
-                userToToggleDisable.disabled ? "bg-green-100" : "bg-orange-100"
-              }`}>
+              <div
+                className={`w-12 h-12 rounded-xl flex items-center justify-center flex-shrink-0 ${
+                  userToToggleDisable.disabled
+                    ? "bg-green-100"
+                    : "bg-orange-100"
+                }`}
+              >
                 {userToToggleDisable.disabled ? (
                   <UserCheck className="w-6 h-6 text-green-600" />
                 ) : (
@@ -831,11 +901,13 @@ export default function UsersPage() {
               </div>
               <div>
                 <h3 className="text-xl font-bold text-gray-900 mb-2">
-                  {userToToggleDisable.disabled ? "Enable Account?" : "Disable Account?"}
+                  {userToToggleDisable.disabled
+                    ? "Enable Account?"
+                    : "Disable Account?"}
                 </h3>
                 <p className="text-gray-600 text-sm">
-                  {userToToggleDisable.disabled 
-                    ? "Restore access for:" 
+                  {userToToggleDisable.disabled
+                    ? "Restore access for:"
                     : "Suspend access for:"}
                 </p>
                 <p className="font-semibold text-gray-900 mt-1">
@@ -843,16 +915,22 @@ export default function UsersPage() {
                 </p>
               </div>
             </div>
-            
-            <div className={`border rounded-lg p-3 mb-4 ${
-              userToToggleDisable.disabled 
-                ? "bg-green-50 border-green-200" 
-                : "bg-orange-50 border-orange-200"
-            }`}>
-              <p className={`text-sm ${
-                userToToggleDisable.disabled ? "text-green-800" : "text-orange-800"
-              }`}>
-                {userToToggleDisable.disabled 
+
+            <div
+              className={`border rounded-lg p-3 mb-4 ${
+                userToToggleDisable.disabled
+                  ? "bg-green-50 border-green-200"
+                  : "bg-orange-50 border-orange-200"
+              }`}
+            >
+              <p
+                className={`text-sm ${
+                  userToToggleDisable.disabled
+                    ? "text-green-800"
+                    : "text-orange-800"
+                }`}
+              >
+                {userToToggleDisable.disabled
                   ? "This user will regain access to sign in and use their account."
                   : "⚠️ This user will be immediately logged out and cannot sign in until re-enabled. All data will be preserved."}
               </p>
@@ -876,7 +954,9 @@ export default function UsersPage() {
                     : "bg-orange-600 hover:bg-orange-700 text-white"
                 }`}
               >
-                {userToToggleDisable.disabled ? "Enable Account" : "Disable Account"}
+                {userToToggleDisable.disabled
+                  ? "Enable Account"
+                  : "Disable Account"}
               </button>
             </div>
           </div>
@@ -903,10 +983,11 @@ export default function UsersPage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
               <p className="text-sm text-blue-800">
-                The user will receive an email with a secure link to reset their password.
+                The user will receive an email with a secure link to reset their
+                password.
               </p>
             </div>
 
@@ -951,7 +1032,7 @@ export default function UsersPage() {
                 </p>
               </div>
             </div>
-            
+
             <div className="bg-red-50 border border-red-200 rounded-lg p-3 mb-4">
               <p className="text-sm text-red-800 font-medium mb-2">
                 ⚠️ This action cannot be undone!
@@ -965,7 +1046,9 @@ export default function UsersPage() {
 
             <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
               <p className="text-sm text-yellow-800">
-                <span className="font-semibold">💡 Tip:</span> Consider using "Disable Account" instead to preserve data while preventing access.
+                <span className="font-semibold">💡 Tip:</span> Consider using
+                "Disable Account" instead to preserve data while preventing
+                access.
               </p>
             </div>
 
@@ -984,7 +1067,9 @@ export default function UsersPage() {
                 disabled={deletingUserId === userToDelete?.id}
                 className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
               >
-                {deletingUserId === userToDelete?.id ? "Deleting..." : "Delete Permanently"}
+                {deletingUserId === userToDelete?.id
+                  ? "Deleting..."
+                  : "Delete Permanently"}
               </button>
             </div>
           </div>
@@ -1054,18 +1139,20 @@ export default function UsersPage() {
             {resetEmailSent ? (
               <div className="bg-green-50 border border-green-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-green-800">
-                  <span className="font-semibold">✅ Email sent:</span> A password
-                  reset email has been automatically sent to{" "}
-                  <span className="font-semibold">{resetLinkEmail}</span>. You can
-                  also share the link above manually.
+                  <span className="font-semibold">✅ Email sent:</span> A
+                  password reset email has been automatically sent to{" "}
+                  <span className="font-semibold">{resetLinkEmail}</span>. You
+                  can also share the link above manually.
                 </p>
               </div>
             ) : (
               <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 mb-6">
                 <p className="text-sm text-orange-800">
-                  <span className="font-semibold">📋 Manual share required:</span>{" "}
-                  The email could not be sent automatically. Please copy and share
-                  the link above with the user directly.
+                  <span className="font-semibold">
+                    📋 Manual share required:
+                  </span>{" "}
+                  The email could not be sent automatically. Please copy and
+                  share the link above with the user directly.
                 </p>
               </div>
             )}

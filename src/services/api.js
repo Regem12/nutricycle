@@ -101,6 +101,12 @@ export const getMachines = async () => {
   return apiRequest("/machines");
 };
 
+// Admin endpoint: Get all machines in the system
+export const getAllMachines = async (includeArchived = false) => {
+  const params = includeArchived ? "?includeArchived=true" : "";
+  return apiRequest(`/admin/machines${params}`);
+};
+
 export const getMachineById = async (machineId) => {
   return apiRequest(`/machines/${machineId}`);
 };
@@ -119,10 +125,29 @@ export const updateMachine = async (machineId, machineData) => {
   });
 };
 
-export const deleteMachine = async (machineId) => {
+export const archiveMachine = async (machineId) => {
   return apiRequest(`/admin/machines/${machineId}`, {
     method: "DELETE",
   });
+};
+
+// Alias for backward compatibility
+export const deleteMachine = archiveMachine;
+
+export const restoreMachine = async (machineId) => {
+  return apiRequest(`/admin/machines/${machineId}/restore`, {
+    method: "POST",
+  });
+};
+
+export const permanentlyDeleteMachine = async (machineId) => {
+  return apiRequest(`/admin/machines/${machineId}/permanent`, {
+    method: "DELETE",
+  });
+};
+
+export const getMachineStatus = async (machineId) => {
+  return apiRequest(`/machines/${machineId}/status`);
 };
 
 // ============= BATCHES API =============
