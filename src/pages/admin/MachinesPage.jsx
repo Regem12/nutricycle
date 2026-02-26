@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useSearchParams } from "react-router-dom";
 import {
   Cpu,
   Search,
@@ -23,6 +23,7 @@ import {
   AlertCircle,
   Archive,
   AlertTriangle,
+  Loader2,
 } from "lucide-react";
 import DashboardHeader from "@/components/admin/DashboardHeader";
 import {
@@ -35,7 +36,11 @@ import toast from "react-hot-toast";
 
 export default function MachinesPage() {
   const navigate = useNavigate();
-  const [searchTerm, setSearchTerm] = useState("");
+  const [searchParams] = useSearchParams();
+  // Pre-populate search from URL param (e.g. navigated from BatchesPage machine link)
+  const [searchTerm, setSearchTerm] = useState(
+    () => searchParams.get("search") || "",
+  );
   const [filterStatus, setFilterStatus] = useState("all");
   const [sortBy, setSortBy] = useState("lastActive");
   const [sortOrder, setSortOrder] = useState("desc");
@@ -466,254 +471,257 @@ export default function MachinesPage() {
 
         {/* Machines Table */}
         <div className="bg-white rounded-xl border border-gray-200 overflow-hidden">
-          <div className="overflow-x-auto">
-            <table className="w-full">
-              <thead className="bg-gray-50 border-b border-gray-200">
-                <tr>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Machine ID
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Status
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Telemetry
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Batches
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Users
-                  </th>
-                  <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Last Active
-                  </th>
-                  <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
-                    Actions
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-gray-200">
-                {loading ? (
+          {loading ? (
+            <div className="p-12">
+              <div className="flex flex-col items-center gap-3">
+                <Loader2 className="w-8 h-8 text-green-600 animate-spin" />
+                <p className="text-gray-600 font-medium">Loading machines...</p>
+              </div>
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full">
+                <thead className="bg-gray-50 border-b border-gray-200">
                   <tr>
-                    <td
-                      colSpan="7"
-                      className="px-6 py-12 text-center text-gray-500"
-                    >
-                      <div className="flex items-center justify-center gap-2">
-                        <div className="w-5 h-5 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                        <span>Loading machines...</span>
-                      </div>
-                    </td>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Machine ID
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Status
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Telemetry
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Batches
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Users
+                    </th>
+                    <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Last Active
+                    </th>
+                    <th className="px-6 py-4 text-right text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                      Actions
+                    </th>
                   </tr>
-                ) : filteredMachines.length === 0 ? (
-                  <tr>
-                    <td colSpan="7" className="px-6 py-16">
-                      <div className="flex flex-col items-center justify-center text-center">
-                        {machines.length === 0 ? (
-                          <>
-                            <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
-                              <Inbox className="w-8 h-8 text-gray-400" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                              No Machines Yet
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-4">
-                              Machines will appear here once they are registered
-                              with the system.
-                            </p>
-                          </>
-                        ) : (
-                          <>
-                            <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
-                              <AlertCircle className="w-8 h-8 text-orange-500" />
-                            </div>
-                            <h3 className="text-lg font-semibold text-gray-900 mb-1">
-                              No Machines Found
-                            </h3>
-                            <p className="text-sm text-gray-500 mb-4">
-                              {searchTerm
-                                ? `No machines match "${searchTerm}"`
-                                : "Try adjusting your filters"}
-                            </p>
-                            {hasActiveFilters && (
-                              <button
-                                onClick={clearFilters}
-                                className="text-sm text-green-600 hover:text-green-700 font-medium"
-                              >
-                                Clear all filters
-                              </button>
-                            )}
-                          </>
-                        )}
-                      </div>
-                    </td>
-                  </tr>
-                ) : (
-                  filteredMachines.map((machine) => (
-                    <tr
-                      key={machine.id}
-                      onClick={() => handleViewDetails(machine)}
-                      className="hover:bg-gray-50 transition-colors cursor-pointer"
-                    >
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
-                            <Cpu className="w-5 h-5 text-white" />
-                          </div>
-                          <div>
-                            <p className="font-semibold text-gray-900">
-                              {machine.machineId}
-                            </p>
-                            <p className="text-xs text-gray-500">
-                              Added{" "}
-                              {new Date(machine.createdAt).toLocaleDateString()}
-                            </p>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <span
-                            className={`w-2 h-2 rounded-full ${getStatusColor(machine.status)}`}
-                          ></span>
-                          <span
-                            className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(machine.status)}`}
-                          >
-                            {machine.status.charAt(0).toUpperCase() +
-                              machine.status.slice(1)}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        {machine.lastTelemetry &&
-                        (machine.lastTelemetry.temperature !== undefined ||
-                          machine.lastTelemetry.humidity !== undefined) ? (
-                          <div className="text-sm">
-                            {machine.lastTelemetry.temperature !==
-                              undefined && (
-                              <p className="text-gray-900">
-                                🌡️ {machine.lastTelemetry.temperature}°C
-                              </p>
-                            )}
-                            {machine.lastTelemetry.humidity !== undefined && (
-                              <p className="text-gray-600">
-                                💧 {machine.lastTelemetry.humidity}%
-                              </p>
-                            )}
-                          </div>
-                        ) : (
-                          <span className="text-sm text-gray-400">No data</span>
-                        )}
-                      </td>
-                      <td className="px-6 py-4">
-                        <span className="text-sm font-medium text-gray-900">
-                          {machine.batches?.length || 0}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-2">
-                          <Users className="w-4 h-4 text-gray-400" />
-                          <span className="text-sm font-medium text-gray-900">
-                            {machine.userMachines?.length || 0}
-                          </span>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div
-                          className="flex items-center gap-2 text-sm text-gray-600"
-                          title={
-                            machine.lastCommandAt
-                              ? new Date(machine.lastCommandAt).toLocaleString()
-                              : "Never"
-                          }
-                        >
-                          <Clock className="w-4 h-4" />
-                          {getTimeAgo(machine.lastCommandAt)}
-                        </div>
-                      </td>
-                      <td className="px-6 py-4">
-                        <div className="flex items-center justify-end gap-2">
-                          {machine.isArchived ? (
+                </thead>
+                <tbody className="divide-y divide-gray-200">
+                  {filteredMachines.length === 0 ? (
+                    <tr>
+                      <td colSpan="7" className="px-6 py-16">
+                        <div className="flex flex-col items-center justify-center text-center">
+                          {machines.length === 0 ? (
                             <>
-                              {/* Restore Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleRestoreMachine(machine);
-                                }}
-                                disabled={
-                                  restoringMachineId === machine.machineId
-                                }
-                                className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Restore machine"
-                              >
-                                {restoringMachineId === machine.machineId ? (
-                                  <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                  <Archive className="w-4 h-4" />
-                                )}
-                              </button>
-                              {/* Permanent Delete Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  confirmPermanentDelete(machine);
-                                }}
-                                disabled={
-                                  deletingMachineId === machine.machineId
-                                }
-                                className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Permanently delete machine"
-                              >
-                                {deletingMachineId === machine.machineId ? (
-                                  <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                  <Trash2 className="w-4 h-4" />
-                                )}
-                              </button>
+                              <div className="w-16 h-16 bg-gray-100 rounded-full flex items-center justify-center mb-4">
+                                <Inbox className="w-8 h-8 text-gray-400" />
+                              </div>
+                              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                No Machines Yet
+                              </h3>
+                              <p className="text-sm text-gray-500 mb-4">
+                                Machines will appear here once they are
+                                registered with the system.
+                              </p>
                             </>
                           ) : (
                             <>
-                              {/* View Details Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handleViewDetails(machine);
-                                }}
-                                className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                title="View details"
-                              >
-                                <Info className="w-4 h-4" />
-                              </button>
-                              {/* Archive Button */}
-                              <button
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  confirmArchive(machine);
-                                }}
-                                disabled={
-                                  archivingMachineId === machine.machineId
-                                }
-                                className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                                title="Archive machine"
-                              >
-                                {archivingMachineId === machine.machineId ? (
-                                  <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
-                                ) : (
-                                  <Trash2 className="w-4 h-4" />
-                                )}
-                              </button>
+                              <div className="w-16 h-16 bg-orange-100 rounded-full flex items-center justify-center mb-4">
+                                <AlertCircle className="w-8 h-8 text-orange-500" />
+                              </div>
+                              <h3 className="text-lg font-semibold text-gray-900 mb-1">
+                                No Machines Found
+                              </h3>
+                              <p className="text-sm text-gray-500 mb-4">
+                                {searchTerm
+                                  ? `No machines match "${searchTerm}"`
+                                  : "Try adjusting your filters"}
+                              </p>
+                              {hasActiveFilters && (
+                                <button
+                                  onClick={clearFilters}
+                                  className="text-sm text-green-600 hover:text-green-700 font-medium"
+                                >
+                                  Clear all filters
+                                </button>
+                              )}
                             </>
                           )}
                         </div>
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ) : (
+                    filteredMachines.map((machine) => (
+                      <tr
+                        key={machine.id}
+                        onClick={() => handleViewDetails(machine)}
+                        className="hover:bg-gray-50 transition-colors cursor-pointer"
+                      >
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-cyan-600 rounded-lg flex items-center justify-center">
+                              <Cpu className="w-5 h-5 text-white" />
+                            </div>
+                            <div>
+                              <p className="font-semibold text-gray-900">
+                                {machine.machineId}
+                              </p>
+                              <p className="text-xs text-gray-500">
+                                Added{" "}
+                                {new Date(
+                                  machine.createdAt,
+                                ).toLocaleDateString()}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <span
+                              className={`w-2 h-2 rounded-full ${getStatusColor(machine.status)}`}
+                            ></span>
+                            <span
+                              className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium ${getStatusBadgeColor(machine.status)}`}
+                            >
+                              {machine.status.charAt(0).toUpperCase() +
+                                machine.status.slice(1)}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          {machine.lastTelemetry &&
+                          (machine.lastTelemetry.temperature !== undefined ||
+                            machine.lastTelemetry.humidity !== undefined) ? (
+                            <div className="text-sm">
+                              {machine.lastTelemetry.temperature !==
+                                undefined && (
+                                <p className="text-gray-900">
+                                  🌡️ {machine.lastTelemetry.temperature}°C
+                                </p>
+                              )}
+                              {machine.lastTelemetry.humidity !== undefined && (
+                                <p className="text-gray-600">
+                                  💧 {machine.lastTelemetry.humidity}%
+                                </p>
+                              )}
+                            </div>
+                          ) : (
+                            <span className="text-sm text-gray-400">
+                              No data
+                            </span>
+                          )}
+                        </td>
+                        <td className="px-6 py-4">
+                          <span className="text-sm font-medium text-gray-900">
+                            {machine.batches?.length || 0}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center gap-2">
+                            <Users className="w-4 h-4 text-gray-400" />
+                            <span className="text-sm font-medium text-gray-900">
+                              {machine.userMachines?.length || 0}
+                            </span>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div
+                            className="flex items-center gap-2 text-sm text-gray-600"
+                            title={
+                              machine.lastCommandAt
+                                ? new Date(
+                                    machine.lastCommandAt,
+                                  ).toLocaleString()
+                                : "Never"
+                            }
+                          >
+                            <Clock className="w-4 h-4" />
+                            {getTimeAgo(machine.lastCommandAt)}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4">
+                          <div className="flex items-center justify-end gap-2">
+                            {machine.isArchived ? (
+                              <>
+                                {/* Restore Button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleRestoreMachine(machine);
+                                  }}
+                                  disabled={
+                                    restoringMachineId === machine.machineId
+                                  }
+                                  className="p-2 text-green-600 hover:bg-green-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Restore machine"
+                                >
+                                  {restoringMachineId === machine.machineId ? (
+                                    <div className="w-4 h-4 border-2 border-green-600 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    <Archive className="w-4 h-4" />
+                                  )}
+                                </button>
+                                {/* Permanent Delete Button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    confirmPermanentDelete(machine);
+                                  }}
+                                  disabled={
+                                    deletingMachineId === machine.machineId
+                                  }
+                                  className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Permanently delete machine"
+                                >
+                                  {deletingMachineId === machine.machineId ? (
+                                    <div className="w-4 h-4 border-2 border-red-600 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </>
+                            ) : (
+                              <>
+                                {/* View Details Button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handleViewDetails(machine);
+                                  }}
+                                  className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                                  title="View details"
+                                >
+                                  <Info className="w-4 h-4" />
+                                </button>
+                                {/* Archive Button */}
+                                <button
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    confirmArchive(machine);
+                                  }}
+                                  disabled={
+                                    archivingMachineId === machine.machineId
+                                  }
+                                  className="p-2 text-orange-600 hover:bg-orange-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                                  title="Archive machine"
+                                >
+                                  {archivingMachineId === machine.machineId ? (
+                                    <div className="w-4 h-4 border-2 border-orange-600 border-t-transparent rounded-full animate-spin"></div>
+                                  ) : (
+                                    <Trash2 className="w-4 h-4" />
+                                  )}
+                                </button>
+                              </>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
 
@@ -954,19 +962,19 @@ export default function MachinesPage() {
                   <div className="grid grid-cols-2 gap-4">
                     {selectedMachine.lastTelemetry.temperature !==
                       undefined && (
-                      <div className="bg-blue-50 rounded-lg p-4">
-                        <p className="text-sm text-blue-600 mb-1">
+                      <div className="bg-orange-50 rounded-lg p-4">
+                        <p className="text-sm text-orange-600 mb-1">
                           Temperature
                         </p>
-                        <p className="text-2xl font-bold text-blue-900">
+                        <p className="text-2xl font-bold text-orange-700">
                           {selectedMachine.lastTelemetry.temperature}°C
                         </p>
                       </div>
                     )}
                     {selectedMachine.lastTelemetry.humidity !== undefined && (
-                      <div className="bg-cyan-50 rounded-lg p-4">
-                        <p className="text-sm text-cyan-600 mb-1">Humidity</p>
-                        <p className="text-2xl font-bold text-cyan-900">
+                      <div className="bg-blue-50 rounded-lg p-4">
+                        <p className="text-sm text-blue-600 mb-1">Humidity</p>
+                        <p className="text-2xl font-bold text-blue-700">
                           {selectedMachine.lastTelemetry.humidity}%
                         </p>
                       </div>
@@ -1028,11 +1036,11 @@ export default function MachinesPage() {
                     {selectedMachine.batches.slice(0, 5).map((batch) => (
                       <div
                         key={batch.id}
-                        onClick={() => {
-                          navigate("/admin/batches", {
-                            state: { selectedBatchId: batch.id },
-                          });
-                        }}
+                        onClick={() =>
+                          navigate(
+                            `/admin/batches?machineId=${selectedMachine.machineId}`,
+                          )
+                        }
                         className="flex items-center justify-between p-3 bg-gray-50 rounded-lg hover:bg-gray-100 cursor-pointer transition-colors"
                       >
                         <div>
@@ -1096,7 +1104,19 @@ export default function MachinesPage() {
             </div>
 
             {/* Footer */}
-            <div className="flex justify-end gap-3 p-6 border-t border-gray-200 flex-shrink-0">
+            <div className="flex items-center justify-between p-6 border-t border-gray-200 flex-shrink-0">
+              <button
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  navigate(
+                    `/admin/batches?machineId=${selectedMachine.machineId}`,
+                  );
+                }}
+                className="flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-200 text-green-700 rounded-lg hover:bg-green-100 transition-colors text-sm font-medium"
+              >
+                <Package className="w-4 h-4" />
+                View Batches
+              </button>
               <button
                 onClick={() => setShowDetailsModal(false)}
                 className="px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"

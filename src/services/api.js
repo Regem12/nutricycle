@@ -151,8 +151,9 @@ export const getMachineStatus = async (machineId) => {
 };
 
 // ============= BATCHES API =============
-export const getBatches = async () => {
-  return apiRequest("/batches");
+export const getBatches = async (machineId) => {
+  const query = machineId ? `?machineId=${encodeURIComponent(machineId)}` : "";
+  return apiRequest(`/batches${query}`);
 };
 
 export const getBatchById = async (batchId) => {
