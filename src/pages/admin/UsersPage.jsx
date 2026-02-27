@@ -20,6 +20,7 @@ import {
   ArrowUpDown,
   ChevronLeft,
   ChevronRight,
+  UserPlus,
 } from "lucide-react";
 import DashboardHeader from "@/components/admin/DashboardHeader";
 import {
@@ -28,6 +29,7 @@ import {
   getUsers,
   deleteUser,
   updateUser,
+  createUser,
 } from "@/services/api";
 import { auth } from "@/config/firebase";
 import { sendPasswordResetEmail } from "firebase/auth";
@@ -61,6 +63,14 @@ export default function UsersPage() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+
+  // Add User Modal States
+  const [showAddUserModal, setShowAddUserModal] = useState(false);
+  const [newUserEmail, setNewUserEmail] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserIsAdmin, setNewUserIsAdmin] = useState(false);
+  const [isCreatingUser, setIsCreatingUser] = useState(false);
+  const [createUserError, setCreateUserError] = useState("");
 
   // Fetch users on component mount
   useEffect(() => {
@@ -381,6 +391,105 @@ export default function UsersPage() {
     }
   };
 
+  const validatePassword = (password) => {
+    const requirements = {
+      minLength: password.length >= 6,
+      hasUppercase: /[A-Z]/.test(password),
+      hasNumber: /[0-9]/.test(password),
+      hasSpecial: /[!@#$%^&*]/.test(password),
+    };
+
+    const isValid = Object.values(requirements).every((req) => req);
+    return { requirements, isValid };
+  };
+
+  const handleCreateUser = async (e) => {
+    e.preventDefault();
+    setCreateUserError("");
+
+    // Validation
+    if (!newUserEmail || !newUserPassword) {
+      setCreateUserError("Email and password are required");
+      return;
+    }
+
+    if (!newUserEmail.includes("@")) {
+      setCreateUserError("Please enter a valid email address");
+      return;
+    }
+
+    const passwordCheck = validatePassword(newUserPassword);
+    if (!passwordCheck.isValid) {
+      const missing = [];
+      if (!passwordCheck.requirements.minLength) missing.push("6+ characters");
+      if (!passwordCheck.requirements.hasUppercase)
+        missing.push("uppercase letter");
+      if (!passwordCheck.requirements.hasNumber) missing.push("number");
+      if (!passwordCheck.requirements.hasSpecial)
+        missing.push("special character (!@#$%^&*)");
+
+      setCreateUserError(`Password must contain: ${missing.join(", ")}`);
+      return;
+    }
+
+    try {
+      setIsCreatingUser(true);
+      const loadingToast = toast.loading("Creating user account...");
+
+      const response = await createUser({
+        email: newUserEmail,
+        password: newUserPassword,
+        isAdmin: newUserIsAdmin,
+      });
+
+      toast.dismiss(loadingToast);
+
+      // Reset form
+      setNewUserEmail("");
+      setNewUserPassword("");
+      setNewUserIsAdmin(false);
+      setShowAddUserModal(false);
+
+      // Refresh users list
+      await fetchUsers();
+
+      toast.success(
+        `User account created successfully!${newUserIsAdmin ? " (Admin access granted)" : ""}`,
+      );
+    } catch (error) {
+      toast.dismiss();
+      console.error("Error creating user:", error);
+
+      let errorMessage = "Failed to create user";
+
+      if (error.response?.status === 400) {
+        const errorData = error.response.data;
+        if (errorData.error?.includes("already exists")) {
+          errorMessage = "An account with this email already exists";
+        } else if (errorData.error?.includes("Invalid email")) {
+          errorMessage = "Invalid email address";
+        } else if (errorData.error?.includes("Password")) {
+          errorMessage = errorData.error;
+        } else {
+          errorMessage = errorData.error || errorMessage;
+        }
+      }
+
+      setCreateUserError(errorMessage);
+      toast.error(errorMessage);
+    } finally {
+      setIsCreatingUser(false);
+    }
+  };
+
+  const closeAddUserModal = () => {
+    setShowAddUserModal(false);
+    setNewUserEmail("");
+    setNewUserPassword("");
+    setNewUserIsAdmin(false);
+    setCreateUserError("");
+  };
+
   return (
     <div className="flex-1 overflow-auto bg-gray-50">
       <DashboardHeader
@@ -443,6 +552,15 @@ export default function UsersPage() {
               <RefreshCw
                 className={`w-4 h-4 ${loading ? "animate-spin" : ""}`}
               />
+            </button>
+
+            {/* Add User Button */}
+            <button
+              onClick={() => setShowAddUserModal(true)}
+              className="flex items-center gap-2 px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition-colors"
+            >
+              <UserPlus className="w-4 h-4" />
+              <span className="hidden sm:inline">Add User</span>
             </button>
           </div>
         </div>
@@ -1072,6 +1190,204 @@ export default function UsersPage() {
                   : "Delete Permanently"}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Add User Modal */}
+      {showAddUserModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl">
+            <div className="flex items-start gap-4 mb-6">
+              <div className="w-12 h-12 bg-green-100 rounded-xl flex items-center justify-center flex-shrink-0">
+                <UserPlus className="w-6 h-6 text-green-600" />
+              </div>
+              <div>
+                <h3 className="text-2xl font-bold text-gray-900 mb-2">
+                  Create New User
+                </h3>
+                <p className="text-gray-600 text-sm">
+                  Add a new user account to the system
+                </p>
+              </div>
+            </div>
+
+            <form onSubmit={handleCreateUser} className="space-y-4">
+              {/* Error Message */}
+              {createUserError && (
+                <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                  <p className="text-sm text-red-800">{createUserError}</p>
+                </div>
+              )}
+
+              {/* Email Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Email Address *
+                </label>
+                <input
+                  type="email"
+                  value={newUserEmail}
+                  onChange={(e) => setNewUserEmail(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                  placeholder="user@example.com"
+                  required
+                  disabled={isCreatingUser}
+                />
+              </div>
+
+              {/* Password Field */}
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-1">
+                  Password *
+                </label>
+                <input
+                  type="password"
+                  value={newUserPassword}
+                  onChange={(e) => setNewUserPassword(e.target.value)}
+                  className="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none"
+                  placeholder="e.g., SecurePass123!"
+                  required
+                  disabled={isCreatingUser}
+                />
+
+                {/* Password Requirements Checklist */}
+                {newUserPassword && (
+                  <div className="mt-2 p-3 bg-gray-50 rounded-lg border border-gray-200">
+                    <p className="text-xs font-medium text-gray-700 mb-2">
+                      Password must contain:
+                    </p>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-2">
+                        {validatePassword(newUserPassword).requirements
+                          .minLength ? (
+                          <Check className="w-3.5 h-3.5 text-green-600" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 text-red-500 font-bold text-xs">
+                            ✕
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs ${validatePassword(newUserPassword).requirements.minLength ? "text-green-700" : "text-gray-600"}`}
+                        >
+                          At least 6 characters
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {validatePassword(newUserPassword).requirements
+                          .hasUppercase ? (
+                          <Check className="w-3.5 h-3.5 text-green-600" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 text-red-500 font-bold text-xs">
+                            ✕
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs ${validatePassword(newUserPassword).requirements.hasUppercase ? "text-green-700" : "text-gray-600"}`}
+                        >
+                          One uppercase letter (A-Z)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {validatePassword(newUserPassword).requirements
+                          .hasNumber ? (
+                          <Check className="w-3.5 h-3.5 text-green-600" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 text-red-500 font-bold text-xs">
+                            ✕
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs ${validatePassword(newUserPassword).requirements.hasNumber ? "text-green-700" : "text-gray-600"}`}
+                        >
+                          One number (0-9)
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        {validatePassword(newUserPassword).requirements
+                          .hasSpecial ? (
+                          <Check className="w-3.5 h-3.5 text-green-600" />
+                        ) : (
+                          <span className="w-3.5 h-3.5 text-red-500 font-bold text-xs">
+                            ✕
+                          </span>
+                        )}
+                        <span
+                          className={`text-xs ${validatePassword(newUserPassword).requirements.hasSpecial ? "text-green-700" : "text-gray-600"}`}
+                        >
+                          One special character (!@#$%^&*)
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                <p className="text-xs text-gray-500 mt-2">
+                  User can change this after first login via password reset
+                </p>
+              </div>
+
+              {/* Admin Checkbox */}
+              <div className="flex items-start gap-3 p-4 bg-gray-50 rounded-lg border border-gray-200">
+                <input
+                  type="checkbox"
+                  id="isAdmin"
+                  checked={newUserIsAdmin}
+                  onChange={(e) => setNewUserIsAdmin(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-green-600 border-gray-300 rounded focus:ring-green-500"
+                  disabled={isCreatingUser}
+                />
+                <label htmlFor="isAdmin" className="flex-1 cursor-pointer">
+                  <div className="flex items-center gap-2">
+                    <Shield className="w-4 h-4 text-green-600" />
+                    <span className="text-sm font-medium text-gray-900">
+                      Grant Admin Access
+                    </span>
+                  </div>
+                  <p className="text-xs text-gray-600 mt-1">
+                    User will have full admin privileges immediately
+                  </p>
+                </label>
+              </div>
+
+              {/* Info Box */}
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <p className="text-sm text-blue-800">
+                  <span className="font-semibold">📧 Next step:</span> Use the
+                  "Reset Password" action to send a password reset email to the
+                  user, or share the temporary password securely.
+                </p>
+              </div>
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 justify-end pt-2">
+                <button
+                  type="button"
+                  onClick={closeAddUserModal}
+                  disabled={isCreatingUser}
+                  className="px-4 py-2.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-medium rounded-lg transition-colors disabled:opacity-50"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isCreatingUser}
+                  className="px-4 py-2.5 bg-green-600 hover:bg-green-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2"
+                >
+                  {isCreatingUser ? (
+                    <>
+                      <Loader2 className="w-4 h-4 animate-spin" />
+                      Creating...
+                    </>
+                  ) : (
+                    <>
+                      <UserPlus className="w-4 h-4" />
+                      Create User
+                    </>
+                  )}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}

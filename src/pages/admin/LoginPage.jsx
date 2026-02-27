@@ -9,7 +9,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSignupMode, setIsSignupMode] = useState(false);
+  // const [isSignupMode, setIsSignupMode] = useState(false); // Disabled - admin-only user creation
   const [loginAttempted, setLoginAttempted] = useState(false);
   const [showForgotPassword, setShowForgotPassword] = useState(false);
   const [resetEmail, setResetEmail] = useState("");
@@ -65,16 +65,11 @@ export default function LoginPage() {
       return;
     }
 
-    // Attempt login or signup
-    const result = isSignupMode
-      ? await register(email, password)
-      : await login(email, password);
+    // Attempt login only (signup disabled)
+    const result = await login(email, password);
 
     if (!result.success) {
-      setError(
-        result.error ||
-          `${isSignupMode ? "Signup" : "Login"} failed. Please try again.`,
-      );
+      setError(result.error || "Login failed. Please try again.");
       setIsLoading(false);
       setLoginAttempted(false);
     } else {
@@ -177,25 +172,23 @@ export default function LoginPage() {
                 >
                   Password
                 </label>
-                {!isSignupMode && (
-                  <button
-                    type="button"
-                    onClick={() => {
-                      setShowForgotPassword(true);
-                      setResetEmail(email);
-                    }}
-                    disabled={resetCooldown > 0}
-                    className={`text-sm font-medium transition-colors ${
-                      resetCooldown > 0
-                        ? "text-gray-400 cursor-not-allowed"
-                        : "text-green-600 hover:text-green-700"
-                    }`}
-                  >
-                    {resetCooldown > 0
-                      ? `Wait ${resetCooldown}s`
-                      : "Forgot Password?"}
-                  </button>
-                )}
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowForgotPassword(true);
+                    setResetEmail(email);
+                  }}
+                  disabled={resetCooldown > 0}
+                  className={`text-sm font-medium transition-colors ${
+                    resetCooldown > 0
+                      ? "text-gray-400 cursor-not-allowed"
+                      : "text-green-600 hover:text-green-700"
+                  }`}
+                >
+                  {resetCooldown > 0
+                    ? `Wait ${resetCooldown}s`
+                    : "Forgot Password?"}
+                </button>
               </div>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
@@ -222,32 +215,26 @@ export default function LoginPage() {
               {isLoading ? (
                 <>
                   <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  {isSignupMode ? "Creating account..." : "Signing in..."}
+                  Signing in...
                 </>
               ) : (
                 <>
                   <Lock className="w-5 h-5" />
-                  {isSignupMode ? "Create Admin Account" : "Sign In"}
+                  Sign In
                 </>
               )}
             </button>
           </form>
 
-          {/* Toggle between login and signup */}
-          <div className="mt-6 pt-6 border-t border-gray-200 text-center">
-            <p className="text-sm text-gray-600">
-              {isSignupMode ? "Already have an account?" : "First time setup?"}{" "}
-              <button
-                type="button"
-                onClick={() => {
-                  setIsSignupMode(!isSignupMode);
-                  setError("");
-                }}
-                className="font-semibold text-green-600 hover:text-green-700 transition-colors"
-              >
-                {isSignupMode ? "Sign In" : "Create Account"}
-              </button>
-            </p>
+          {/* Info message about account creation */}
+          <div className="mt-6 pt-6 border-t border-gray-200">
+            <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+              <p className="text-sm text-blue-800">
+                <span className="font-semibold">👤 Need an account?</span>
+                <br />
+                Contact your system administrator to create an account for you.
+              </p>
+            </div>
           </div>
         </div>
 
