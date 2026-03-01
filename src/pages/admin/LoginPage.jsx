@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { Lock, Mail, AlertCircle } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { useNavigate, useLocation, Link } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import toast from "react-hot-toast";
 
 export default function LoginPage() {
@@ -17,7 +17,6 @@ export default function LoginPage() {
   const [resetCooldown, setResetCooldown] = useState(0);
   const { user, loading, login, register, resetPassword } = useAuth();
   const navigate = useNavigate();
-  const location = useLocation();
 
   // Cooldown timer effect
   useEffect(() => {
@@ -31,15 +30,14 @@ export default function LoginPage() {
   useEffect(() => {
     if (user) {
       toast.success("Login successful.");
-      const from = location.state?.from?.pathname || "/admin/dashboard";
-      navigate(from, { replace: true });
+      navigate("/admin/dashboard", { replace: true });
     } else if (loginAttempted && !loading && !user) {
       // Login was attempted, auth finished processing, but no user = no admin claim
       setError("Admin access required. You do not have admin privileges.");
       setIsLoading(false);
       setLoginAttempted(false);
     }
-  }, [user, loading, loginAttempted, navigate, location]);
+  }, [user, loading, loginAttempted, navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -242,7 +240,7 @@ export default function LoginPage() {
         <div className="text-center mt-8">
           <Link
             to="/"
-            className="text-sm font-medium text-gray-600 hover:text-green-600 transition-colors inline-flex items-center gap-1"
+            className="inline-flex items-center gap-2 px-6 py-3 text-base font-medium text-gray-700 bg-white border-2 border-gray-300 rounded-lg hover:border-green-600 hover:text-green-600 transition-all shadow-sm hover:shadow-md"
           >
             ← Back to main site
           </Link>

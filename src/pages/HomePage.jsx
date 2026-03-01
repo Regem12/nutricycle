@@ -10,10 +10,12 @@ import GallerySection from "@/components/sections/GallerySection";
 import AboutSection from "@/components/sections/AboutSection";
 import ContactSection from "@/components/sections/ContactSection";
 import Footer from "@/components/Footer";
+import { useAuth } from "@/contexts/AuthContext";
 
 export default function HomePage() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [showAppModal, setShowAppModal] = useState(false);
+  const { user } = useAuth();
 
   const scrollToSection = (id) => {
     // Always close mobile menu first
@@ -45,6 +47,7 @@ export default function HomePage() {
         mobileMenuOpen={mobileMenuOpen}
         setMobileMenuOpen={setMobileMenuOpen}
         scrollToSection={scrollToSection}
+        user={user}
       />
 
       {/* Full-width HeroSection - moved outside the constrained main */}

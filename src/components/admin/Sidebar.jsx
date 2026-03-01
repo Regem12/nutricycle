@@ -7,6 +7,7 @@ import {
   LogOut,
   X,
   Loader2,
+  Home,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
 import logo from "@/assets/logo1.png";
@@ -68,6 +69,16 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
 
         {/* Navigation */}
         <nav className="flex-1 p-4 space-y-1 overflow-y-auto">
+          {/* Back to Site Link */}
+          <Link
+            to="/"
+            onClick={onClose}
+            className="flex items-center gap-3 px-4 py-3 rounded-lg text-gray-600 hover:bg-gray-50 hover:text-gray-900 transition-all mb-4 border-b border-gray-200 pb-4"
+          >
+            <Home className="w-5 h-5" />
+            <span>Back to Site</span>
+          </Link>
+
           {navItems.map((item) => {
             const Icon = item.icon;
             const active = isActive(item.path);
