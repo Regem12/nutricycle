@@ -1,5 +1,5 @@
 import React from "react";
-import { Bell, Search, User, Menu } from "lucide-react";
+import { User, Menu } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useOutletContext } from "react-router-dom";
 
@@ -30,25 +30,8 @@ export default function DashboardHeader({ title, subtitle }) {
           </div>
         </div>
 
-        {/* Actions Section */}
+        {/* User Profile */}
         <div className="flex items-center gap-4">
-          {/* Search Bar */}
-          <div className="relative hidden md:block">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-10 pr-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 outline-none w-64"
-            />
-          </div>
-
-          {/* Notifications */}
-          <button className="relative p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors hidden sm:block">
-            <Bell className="w-5 h-5" />
-            <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full"></span>
-          </button>
-
-          {/* User Profile */}
           <button className="flex items-center gap-3 px-3 py-2 hover:bg-gray-100 rounded-lg transition-colors">
             <div className="w-8 h-8 bg-gradient-to-br from-green-500 to-emerald-600 rounded-full flex items-center justify-center">
               <User className="w-5 h-5 text-white" />

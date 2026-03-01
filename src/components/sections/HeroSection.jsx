@@ -1,5 +1,6 @@
 import React from "react";
 import Hero3 from "@/assets/hero3.jpg";
+import NutricycleVideo from "@/assets/Nutricycle.mp4";
 
 const HeroSection = ({ setShowAppModal }) => {
   return (
@@ -41,15 +42,17 @@ const HeroSection = ({ setShowAppModal }) => {
         {/* Responsive Video */}
         <div className="flex-1 max-w-lg w-full px-4 lg:px-0">
           <div className="relative bg-white rounded-xl shadow-lg overflow-hidden aspect-video">
-            <iframe
-              className="absolute top-0 left-0 w-full h-full"
-              src="https://www.youtube.com/embed/XWt3u7y7dx0?autoplay=1&mute=1&loop=1&playlist=XWt3u7y7dx0"
-              title="Upcycling Kitchen Waste into Chicken Feed"
-              frameBorder="0"
-              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-              allowFullScreen
-              loading="lazy"
-            ></iframe>
+            <video
+              className="absolute top-0 left-0 w-full h-full object-cover"
+              src={NutricycleVideo}
+              autoPlay
+              controls
+              loop
+              playsInline
+              title="NutriCycle: Upcycling Kitchen Waste into Chicken Feed"
+            >
+              Your browser does not support the video tag.
+            </video>
           </div>
         </div>
       </div>

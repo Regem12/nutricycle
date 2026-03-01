@@ -9,6 +9,7 @@ import {
   Loader2,
 } from "lucide-react";
 import { Link, useLocation } from "react-router-dom";
+import logo from "@/assets/logo1.png";
 
 export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
   const location = useLocation();
@@ -45,9 +46,11 @@ export default function Sidebar({ onLogout, isOpen, onClose, isLoggingOut }) {
         <div className="p-6 border-b border-gray-200">
           <div className="flex items-center justify-between gap-3">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-green-500 to-emerald-600 rounded-lg flex items-center justify-center">
-                <span className="text-white font-bold text-lg">N</span>
-              </div>
+              <img
+                src={logo}
+                alt="NutriCycle Logo"
+                className="w-10 h-10 object-contain"
+              />
               <div>
                 <h2 className="font-bold text-gray-900">NutriCycle</h2>
                 <p className="text-xs text-gray-500">Admin Panel</p>
