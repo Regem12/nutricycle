@@ -1,13 +1,16 @@
 import { describe, it, expect } from "vitest";
 import { render, screen } from "@testing-library/react";
 import { MemoryRouter } from "react-router-dom";
+import { AuthProvider } from "@/contexts/AuthContext";
 import App from "./App";
 
 describe("App Component", () => {
   it("renders without crashing", () => {
     render(
       <MemoryRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </MemoryRouter>,
     );
 
@@ -19,7 +22,9 @@ describe("App Component", () => {
   it("renders Header component", () => {
     render(
       <MemoryRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </MemoryRouter>,
     );
 
@@ -29,7 +34,9 @@ describe("App Component", () => {
   it("renders Footer component", () => {
     render(
       <MemoryRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </MemoryRouter>,
     );
 
@@ -39,7 +46,9 @@ describe("App Component", () => {
   it("renders main sections", () => {
     render(
       <MemoryRouter>
-        <App />
+        <AuthProvider>
+          <App />
+        </AuthProvider>
       </MemoryRouter>,
     );
 
