@@ -1,5 +1,4 @@
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
 import { Menu, X } from "lucide-react";
 import Logo from "../assets/LOGO-Green.svg";
 import logo1 from "../assets/logo1.png";
@@ -8,9 +7,7 @@ export default function Header({
   mobileMenuOpen,
   setMobileMenuOpen,
   scrollToSection,
-  user,
 }) {
-  const navigate = useNavigate();
   const navItems = [
     "Home",
     "How It Works",
@@ -46,21 +43,6 @@ export default function Header({
                 {item}
               </button>
             ))}
-            {user ? (
-              <button
-                onClick={() => navigate("/admin/dashboard")}
-                className="ml-4 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Go to Dashboard
-              </button>
-            ) : (
-              <Link
-                to="/admin/login"
-                className="ml-4 px-4 py-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors"
-              >
-                Login
-              </Link>
-            )}
           </nav>
 
           {/* Mobile Hamburger Button */}
@@ -94,25 +76,6 @@ export default function Header({
                 {item}
               </button>
             ))}
-            {user ? (
-              <button
-                onClick={() => {
-                  navigate("/admin/dashboard");
-                  setMobileMenuOpen(false);
-                }}
-                className="block py-2 px-4 mt-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors text-center"
-              >
-                Go to Dashboard
-              </button>
-            ) : (
-              <Link
-                to="/admin/login"
-                onClick={() => setMobileMenuOpen(false)}
-                className="block py-2 px-4 mt-2 bg-green-600 text-white text-sm font-medium rounded-lg hover:bg-green-700 transition-colors text-center"
-              >
-                Admin Login
-              </Link>
-            )}
           </nav>
         </div>
       )}
