@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import SectionHeader from "@/components/SectionHeader";
-import Prototype1 from "@/assets/img1.png";
+import Prototype1 from "@/assets/iot-device.png";
 import Prototype2 from "@/assets/img2.jpg";
 import Prototype3 from "@/assets/img3.jpg";
 import Prototype4 from "@/assets/img4.jpg";
@@ -39,7 +39,7 @@ const GallerySection = () => {
 
   const prevSlide = () => {
     setCurrentSlide(
-      (prev) => (prev - 1 + galleryImages.length) % galleryImages.length
+      (prev) => (prev - 1 + galleryImages.length) % galleryImages.length,
     );
   };
 
