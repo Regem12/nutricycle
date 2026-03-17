@@ -112,12 +112,7 @@ export default function ResetPasswordPage() {
 
       // Redirect to login after 2 seconds
       setTimeout(() => {
-        navigate("/admin/login", {
-          state: {
-            message:
-              "Password reset successful. Please login with your new password.",
-          },
-        });
+        window.location.href = "https://nutricycle-admin.vercel.app/login";
       }, 2000);
     } catch (error) {
       console.error("Reset error:", error);
